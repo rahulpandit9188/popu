@@ -1,4 +1,4 @@
-import { authApi } from './api/client';
+import { authApi } from './api';
 import { readSession, SESSION_KEY } from './api/sessionStorage.js';
 export { readSession } from './api/sessionStorage.js';
 

@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
-import { academicsApi } from '../api/client';
+import { academicsApi } from '../api';
 import AdminEditor from './AdminEditor';
 import RichNoteEditor from './RichNoteEditor';
+import ContentStudio from './study/ContentStudio';
 
 const TYPES = [
   {
@@ -91,6 +92,8 @@ export default function AdminDashboard({ user, onBack, onOpenClass }) {
   const [activeForm, setActiveForm] = useState('note');
   const [manageSearch, setManageSearch] = useState('');
   const [noteTitle, setNoteTitle] = useState('');
+  const [panel, setPanel] = useState('library');
+  const [questionTarget, setQuestionTarget] = useState(null);
 
   const currentType = TYPES.find((item) => item.id === workspace) || TYPES[3];
 
@@ -359,6 +362,38 @@ export default function AdminDashboard({ user, onBack, onOpenClass }) {
         {error && !editorOpen ? <p className="auth-error" role="alert">{error}</p> : null}
         {success ? <p className="admin-success">{success}</p> : null}
 
+        <div className="admin-panel-switch" role="tablist" aria-label="Dashboard sections">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={panel === 'library'}
+            className={panel === 'library' ? 'active' : ''}
+            onClick={() => setPanel('library')}
+          >
+            Manage content
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={panel === 'upload'}
+            className={panel === 'upload' ? 'active' : ''}
+            onClick={() => setPanel('upload')}
+          >
+            Upload a topic
+          </button>
+        </div>
+
+        {panel === 'upload' ? (
+          <ContentStudio
+            token={user.access}
+            catalog={data}
+            target={questionTarget}
+            onSaved={loadDashboard}
+          />
+        ) : null}
+
+        {panel === 'library' ? (
+        <>
         <section className="admin-stats" aria-label="Content totals">
           {TYPES.map((type) => (
             <div className="admin-stat-card" key={type.id}>
@@ -512,6 +547,25 @@ export default function AdminDashboard({ user, onBack, onOpenClass }) {
                             Student view
                           </button>
                         ) : null}
+                        {workspace === 'chapter' ? (
+                          <button
+                            className="admin-link-btn"
+                            type="button"
+                            onClick={() => {
+                              const chapterSubject = subjectForChapter(item);
+                              setQuestionTarget({
+                                classId: classForSubject(chapterSubject)?.uuid || '',
+                                subjectId: chapterSubject?.uuid || '',
+                                chapterId: item.uuid,
+                                key: `${item.uuid}-${Date.now()}`,
+                              });
+                              setPanel('upload');
+                              window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }}
+                          >
+                            Question set
+                          </button>
+                        ) : null}
                         <button
                           className="admin-action-btn admin-edit-btn"
                           type="button"
@@ -540,6 +594,8 @@ export default function AdminDashboard({ user, onBack, onOpenClass }) {
             ) : null}
           </div>
         </section>
+        </>
+        ) : null}
 
         <AdminEditor
           open={editorOpen}

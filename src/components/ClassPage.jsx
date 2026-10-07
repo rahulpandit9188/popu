@@ -227,7 +227,7 @@ export default function ClassPage({
                           type="button"
                           onClick={() => onDownload(chapter.title)}
                         >
-                          <i className="fas fa-file-pdf"></i> PDF
+                          <i className="fas fa-list-ol"></i> Test
                         </button>
                       </div>
                     </div>

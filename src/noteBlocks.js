@@ -433,14 +433,24 @@ export function htmlToBlocks(html = '') {
 export function blocksToHtml(blocks = []) {
   return blocks
     .map((block) => {
-      if (block.type === 'heading' && block.text?.trim()) {
-        return `<h3>${formatInline(block.text.trim())}</h3>`;
+      const text = String(block.text || block.content || '').trim();
+      if (block.type === 'heading' && text) {
+        return `<h3>${formatInline(text)}</h3>`;
       }
-      if (block.type === 'paragraph' && block.text?.trim()) {
-        return `<p>${formatInline(block.text)}</p>`;
+      if ((block.type === 'paragraph' || block.type === 'concept' || block.type === 'summary') && text) {
+        return `<p>${formatInline(text)}</p>`;
       }
-      if (block.type === 'formula' && (block.latex?.trim() || block.secondaryLatex?.trim())) {
-        const first = unwrapLatex(block.latex || '');
+      if ((block.type === 'definition' || block.type === 'note') && text) {
+        return `<p class="note-tip">${formatInline(block.title ? `${block.title}: ${text}` : text)}</p>`;
+      }
+      if ((block.type === 'question' || block.type === 'try') && text) {
+        return `<div class="example-box"><h4>${formatInline(block.title || 'Question')}</h4><p>${formatInline(text)}</p></div>`;
+      }
+      if ((block.type === 'image' || block.type === 'diagram') && block.url) {
+        return `<figure class="ascii-figure"><img src="${escapeHtml(block.url)}" alt="${escapeHtml(block.text || block.title || 'Diagram')}" /></figure>`;
+      }
+      if (block.type === 'formula' && (block.latex?.trim() || block.secondaryLatex?.trim() || block.content?.trim())) {
+        const first = unwrapLatex(block.latex || block.content || '');
         const second = unwrapLatex(block.secondaryLatex || '');
         const formula = first && second
           ? `${first}\\qquad \\text{and} \\qquad ${second}`
@@ -449,19 +459,20 @@ export function blocksToHtml(blocks = []) {
       }
       if (
         block.type === 'example' &&
-        (block.title?.trim() || block.body?.trim() || block.formula?.trim())
+        (block.title?.trim() || block.body?.trim() || block.content?.trim() || block.formula?.trim())
       ) {
         const exampleFormula = block.formula?.trim()
           ? `<div class="math-block">\\[${unwrapLatex(block.formula)}\\]</div>`
           : '';
-        return `<div class="example-box"><h4>${formatInline(block.title || 'Example')}</h4><p>${formatInline(block.body || '')}</p>${exampleFormula}</div>`;
+        return `<div class="example-box"><h4>${formatInline(block.title || 'Example')}</h4><p>${formatInline(block.body || block.content || '')}</p>${exampleFormula}</div>`;
       }
-      if (block.type === 'diagram' && block.text?.trim()) {
+      if (block.type === 'diagram' && block.text?.trim() && !block.url) {
         return `<div class="ascii-figure">${escapeHtml(block.text)}</div>`;
       }
-      if (block.type === 'tip' && block.text?.trim()) {
-        return `<p class="note-tip">${formatInline(block.text.trim())}</p>`;
+      if (block.type === 'tip' && text) {
+        return `<p class="note-tip">${formatInline(text)}</p>`;
       }
+      if (block.type === 'bullet') block = { ...block, type: 'list' };
       if (block.type === 'list' || block.type === 'numbered') {
         const items = (block.items || []).map((item) => item.trim()).filter(Boolean);
         if (!items.length) return '';

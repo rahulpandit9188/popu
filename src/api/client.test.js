@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { beforeEach, test } from 'node:test';
-import { academicsApi } from './client.js';
+import { academicsApi } from './index.js';
 import { readSession, SESSION_KEY } from './sessionStorage.js';
 
 const reply = (payload, status = 200) => new Response(JSON.stringify(payload), { status });

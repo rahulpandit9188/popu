@@ -55,7 +55,8 @@ async function refreshAccessToken() {
   }
 }
 
-async function request(path, options = {}, retried = false) {
+/** Root HTTP flow — auth / subjects / chapters / notes all call this. */
+export async function request(path, options = {}, retried = false) {
   const { body, token, ...fetchOptions } = options;
   let access = token ? readSession()?.access || token : null;
   if (token && access && tokenExpiresSoon(access)) {
@@ -89,7 +90,7 @@ async function request(path, options = {}, retried = false) {
   return payload;
 }
 
-function queryString(params) {
+export function queryString(params) {
   const query = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== '') {
@@ -99,58 +100,3 @@ function queryString(params) {
   const value = query.toString();
   return value ? `?${value}` : '';
 }
-
-export const authApi = {
-  register: (data) =>
-    request('/authentication/register/', { method: 'POST', body: data }),
-  login: (data) =>
-    request('/authentication/login/', { method: 'POST', body: data }),
-  logout: (refresh) =>
-    request('/authentication/logout/', {
-      method: 'POST',
-      body: { refresh },
-    }),
-};
-
-export const academicsApi = {
-  classes: (params = {}) =>
-    request(`/academics/classes/${queryString({ page_size: 100, ...params })}`),
-  subjects: (params = {}) =>
-    request(`/academics/subjects/${queryString({ page_size: 100, ...params })}`),
-  chapters: (params = {}) =>
-    request(`/academics/chapters/${queryString({ page_size: 100, ...params })}`),
-  notes: (params = {}) =>
-    request(`/academics/notes/${queryString({ page_size: 100, ...params })}`),
-  bulkCreateClasses: (items, token) =>
-    request('/academics/classes/bulk/', { method: 'POST', body: items, token }),
-  bulkCreateSubjects: (items, token) =>
-    request('/academics/subjects/bulk/', { method: 'POST', body: items, token }),
-  bulkCreateChapters: (items, token) =>
-    request('/academics/chapters/bulk/', { method: 'POST', body: items, token }),
-  bulkCreateNotes: (items, token) =>
-    request('/academics/notes/bulk/', { method: 'POST', body: items, token }),
-  createClass: (data, token) =>
-    request('/academics/classes/', { method: 'POST', body: data, token }),
-  createSubject: (data, token) =>
-    request('/academics/subjects/', { method: 'POST', body: data, token }),
-  createChapter: (data, token) =>
-    request('/academics/chapters/', { method: 'POST', body: data, token }),
-  createNote: (data, token) =>
-    request('/academics/notes/', { method: 'POST', body: data, token }),
-  updateClass: (uuid, data, token) =>
-    request(`/academics/classes/${uuid}/`, { method: 'PUT', body: data, token }),
-  updateSubject: (uuid, data, token) =>
-    request(`/academics/subjects/${uuid}/`, { method: 'PUT', body: data, token }),
-  updateChapter: (uuid, data, token) =>
-    request(`/academics/chapters/${uuid}/`, { method: 'PUT', body: data, token }),
-  updateNote: (uuid, data, token) =>
-    request(`/academics/notes/${uuid}/`, { method: 'PUT', body: data, token }),
-  deleteClass: (uuid, token) =>
-    request(`/academics/classes/${uuid}/`, { method: 'DELETE', token }),
-  deleteSubject: (uuid, token) =>
-    request(`/academics/subjects/${uuid}/`, { method: 'DELETE', token }),
-  deleteChapter: (uuid, token) =>
-    request(`/academics/chapters/${uuid}/`, { method: 'DELETE', token }),
-  deleteNote: (uuid, token) =>
-    request(`/academics/notes/${uuid}/`, { method: 'DELETE', token }),
-};

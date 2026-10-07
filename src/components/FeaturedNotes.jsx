@@ -38,7 +38,7 @@ export default function FeaturedNotes({ onRead, onDownload }) {
                       onDownload(note.title);
                     }}
                   >
-                    <i className="fas fa-file-pdf"></i> PDF
+                    <i className="fas fa-list-ol"></i> Test
                   </a>
                 </div>
               </div>

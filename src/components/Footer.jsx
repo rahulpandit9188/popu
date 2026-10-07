@@ -1,4 +1,5 @@
 import { footerColumns, socialLinks } from '../data';
+import globalIcon from '../assets/global-icon.png';
 
 export default function Footer({ onLinkClick }) {
   return (
@@ -13,7 +14,7 @@ export default function Footer({ onLinkClick }) {
                 if (onLinkClick?.('#home')) e.preventDefault();
               }}
             >
-              <i className="fas fa-graduation-cap"></i>
+              <img src={globalIcon} alt="" className="brand-icon" />
               StudyNotes
             </a>
             <p className="footer-description">

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { navLinks } from '../data';
+import globalIcon from '../assets/global-icon.png';
 
 export default function Navbar({
   onSearchClick,
@@ -70,7 +71,7 @@ export default function Navbar({
             setMenuOpen(false);
           }}
         >
-          <i className="fas fa-graduation-cap"></i>
+          <img src={globalIcon} alt="" className="brand-icon" />
           StudyNotes
         </a>
 

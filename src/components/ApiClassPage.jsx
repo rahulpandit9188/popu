@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { academicsApi } from '../api/client';
+import { academicsApi } from '../api';
 import { classLabel, subjectLabel, tUI } from '../mediumText';
 import NoteBlocksRenderer from './NoteBlocksRenderer';
 
@@ -29,7 +29,7 @@ async function fetchAll(fetchPage, params) {
 export default function ApiClassPage({
   classData,
   onBack,
-  onDownload,
+  onStartTest,
   bookmarks = [],
   onToggleBookmark,
   initialSubject,
@@ -284,7 +284,9 @@ export default function ApiClassPage({
                         </button>
                       </div>
                       <h3 className="note-title">{chapter.title || chapter.chapter_name}</h3>
-                      <p className="note-meta">Chapter {chapter.chapter_number} · {chapter.chapter_name}</p>
+                      <p className="note-meta">
+                        Chapter {chapter.chapter_number} · {chapter.chapter_name}
+                      </p>
                     </div>
                     <div className="note-body">
                       <p className="note-description">{chapter.description}</p>
@@ -299,9 +301,9 @@ export default function ApiClassPage({
                         <button
                           className="note-btn note-btn-secondary"
                           type="button"
-                          onClick={() => onDownload(chapter.title || chapter.chapter_name)}
+                          onClick={() => onStartTest?.(chapter, subject?.subject_name)}
                         >
-                          <i className="fas fa-file-pdf"></i> PDF
+                          <i className="fas fa-list-ol"></i> Test
                         </button>
                       </div>
                     </div>

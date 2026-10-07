@@ -18,9 +18,10 @@ import ClassPage from './components/ApiClassPage';
 import AuthPage from './components/AuthPage';
 import ProfilePage from './components/ProfilePage';
 import BookmarksPage from './components/BookmarksPage';
+import ObjectiveTestPage from './components/ObjectiveTestPage';
 import { classPageKeys } from './data';
 import { readBookmarks, toggleBookmark } from './bookmarks';
-import { academicsApi } from './api/client';
+import { academicsApi } from './api';
 import { logoutSession, readSession } from './session';
 
 const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
@@ -37,6 +38,7 @@ export default function App() {
   );
   const [bookmarks, setBookmarks] = useState(() => readBookmarks(readSession()?.email));
   const [openTarget, setOpenTarget] = useState(null);
+  const [activeTest, setActiveTest] = useState(null);
   const [schoolClasses, setSchoolClasses] = useState([]);
   const [classesLoading, setClassesLoading] = useState(true);
   const [classesError, setClassesError] = useState('');
@@ -67,6 +69,7 @@ export default function App() {
     setShowBookmarks(false);
     setShowDashboard(false);
     setOpenTarget(null);
+    setActiveTest(null);
     window.setTimeout(() => {
       if (!hash || hash === 'home') {
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -82,6 +85,7 @@ export default function App() {
     setShowBookmarks(false);
     setShowDashboard(false);
     setOpenTarget(null);
+    setActiveTest(null);
     setAuthMode(mode);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -92,6 +96,7 @@ export default function App() {
     setShowBookmarks(false);
     setShowDashboard(false);
     setOpenTarget(null);
+    setActiveTest(null);
     setShowProfile(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -107,6 +112,7 @@ export default function App() {
     setShowProfile(false);
     setShowDashboard(false);
     setOpenTarget(null);
+    setActiveTest(null);
     setShowBookmarks(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -144,6 +150,7 @@ export default function App() {
     setShowProfile(false);
     setShowBookmarks(false);
     setOpenTarget(null);
+    setActiveTest(null);
     setShowDashboard(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -180,7 +187,7 @@ export default function App() {
       openClass(classPageKeys[id]);
       return true;
     }
-    if (activeClass || authMode || showProfile || showBookmarks || showDashboard) {
+    if (activeClass || authMode || showProfile || showBookmarks || showDashboard || activeTest) {
       goHome(id);
       return true;
     }
@@ -188,7 +195,7 @@ export default function App() {
   };
 
   const scrollToSearch = () => {
-    if (activeClass || authMode || showProfile || showBookmarks || showDashboard) {
+    if (activeClass || authMode || showProfile || showBookmarks || showDashboard || activeTest) {
       goHome('search');
       return;
     }
@@ -197,7 +204,7 @@ export default function App() {
 
   const classData = activeClass;
   const onSpecialPage = Boolean(
-    authMode || classData || showProfile || showBookmarks || showDashboard,
+    authMode || classData || showProfile || showBookmarks || showDashboard || activeTest,
   );
 
   return (
@@ -235,8 +242,15 @@ export default function App() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
         />
+      ) : activeTest ? (
+        <ObjectiveTestPage
+          chapterUuid={activeTest.chapterUuid}
+          title={activeTest.title}
+          subjectName={activeTest.subjectName}
+          onBack={() => setActiveTest(null)}
+        />
       ) : showDashboard && user?.is_staff ? (
-        <Suspense fallback={<main className="admin-dashboard">Loading dashboard…</main>}>
+        <Suspense fallback={<main className="admin-dashboard"><div className="admin-shell"><p>Loading dashboard…</p></div></main>}>
           <AdminDashboard
             user={user}
             onBack={() => goHome('home')}
@@ -274,7 +288,14 @@ export default function App() {
           initialChapter={openTarget?.chapter}
           medium={user?.medium || 'English'}
           onBack={() => goHome('classes')}
-          onDownload={(title) => showToast(`Downloading PDF: ${title}`)}
+          onStartTest={(chapter, subjectName) => {
+            setActiveTest({
+              chapterUuid: chapter.uuid,
+              title: chapter.title || chapter.chapter_name,
+              subjectName,
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
         />
       ) : (
         <>
@@ -290,7 +311,7 @@ export default function App() {
           <PopularSubjects onSelect={(name) => showToast(`Opening ${name} notes`)} />
           <FeaturedNotes
             onRead={(title) => showToast(`Opening: ${title}`)}
-            onDownload={(title) => showToast(`Downloading PDF: ${title}`)}
+            onDownload={(title) => showToast(`Open a class chapter and press Test for ${title}.`)}
           />
           <WhyStudyNotes />
           <HowItWorks />

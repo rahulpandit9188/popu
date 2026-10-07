@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { boards, mediums } from '../data';
-import { authApi } from '../api/client';
+import { authApi } from '../api';
 import { readProfile, updateStoredUser } from '../session';
+import globalIcon from '../assets/global-icon.png';
 
 export default function AuthPage({ mode, onSwitch, onBack, onSuccess }) {
   const isLogin = mode === 'login';
@@ -115,7 +116,7 @@ export default function AuthPage({ mode, onSwitch, onBack, onSuccess }) {
         </button>
 
         <div className="auth-icon">
-          <i className="fas fa-graduation-cap"></i>
+          <img src={globalIcon} alt="" className="brand-icon brand-icon-lg" />
         </div>
         <h1 className="auth-title">{isLogin ? 'Welcome back' : 'Create your account'}</h1>
         <p className="auth-subtitle">
